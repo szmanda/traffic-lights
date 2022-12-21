@@ -1,0 +1,61 @@
+body {
+    background-color: rgb(79, 82, 84);
+    color: white;
+}
+div.road {
+    background-color: rgba(48, 48, 48, 0.652);
+    position: absolute;
+}
+div.road:hover {
+    border: 1px solid #ccc;
+    transition: 300ms;
+}
+div.road.lane-top {
+    border-top: 0.1cm solid white; 
+}
+div.road.lane-bottom {
+    border-bottom: 0.1cm solid white; 
+}
+div.road.lane-right {
+    border-right: 0.1cm solid white; 
+}
+div.road.lane-left {
+    border-left: 0.1cm solid white; 
+}
+div.sidewalk {
+    background-color: rgb(108, 108, 110);
+    position: absolute;
+}
+div.widget {
+    position: absolute;
+    bottom: 1em;
+    left: -1em;
+    right: -1em;
+    margin: auto;
+    background-color: rgba(255, 255, 255, 0.1);
+    width: 4em;
+    border-radius: 5px;
+    font-size: 2em;
+    padding: 0.2em;
+}
+div.widget>div.light {
+    display: inline-block;
+    border-radius: 50%;
+    width: 1cm;
+    height: 1cm;
+    margin: 0.2em;
+    float: left;
+}
+div.widget>div.counter {
+    display: inline-block;
+    clear: both;
+}
+div.widget>div.light.red {
+    background-color: red;
+}
+div.widget>div.light.yellow {
+    background-color: yellow;
+}
+div.widget>div.light.green {
+    background-color: green;
+}

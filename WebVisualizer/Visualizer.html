@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<title>Traffic lights visualizer</title>
+	<link rel="stylesheet" href="./bootstrap.min.css">
+	<link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+<!-- Main crossing -->
+	<div class="road" style="width: 10cm; height: 10cm; top: 10cm; left: 10cm;"></div>
+
+<!-- Setting up the INCOMING roads -->
+	<div id="in-road-north-1" class="road lane-right wait" style="width: 5cm; height: 10cm; top: 0cm; left: 10cm;"></div>
+	<div id="in-road-south-1" class="road lane-left wait" style="width: 5cm; height: 10cm; top: 20cm; left: 15cm;"></div>
+	<!--<div id="in-road-west-1" class="road" style="width: 10cm; height: 5cm; top: 15cm; left: 0cm;"></div>
+	<div id="in-road-east-1" class="road" style="width: 10cm; height: 5cm; top: 10cm; left: 20cm;"></div>-->
+	
+<!-- Setting up the OUTGOING roads -->
+	<div id="out-road-north-1" class="road" style="width: 5cm; height: 10cm; top: 0cm; left: 15cm;"></div>
+	<div id="out-road-south-1" class="road" style="width: 5cm; height: 10cm; top: 20cm; left: 10cm;"></div>
+	<!--<div id="out-road-west-1" class="road lane-bottom" style="width: 10cm; height: 5cm; top: 10cm; left: 0cm;"></div>
+	<div id="out-road-east-1" class="road lane-top" style="width: 10cm; height: 5cm; top: 15cm; left: 20cm;"></div>-->
+
+<!-- Setting up the sidewalks -->
+	<div id="in-sidewalk-west-1" class="sidewalk wait" style="width: 10cm; height: 10cm; top: 10cm; left: 0cm;"></div>
+	<div id="in-sidewalk-east-1" class="sidewalk wait" style="width: 10cm; height: 10cm; top: 10cm; left: 20cm;"></div>
+	
+	<script src="./jquery.min.js"></script>
+	<script src="./popper.min.js"></script>
+	<script src="./bootstrap.min.js"></script>
+	<script src="./script.js"></script>
+</body>
+</html>
