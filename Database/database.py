@@ -1,8 +1,7 @@
 import sqlite3
 import time
 
-
-class Database:
+class Crossroad:
     def __init__(self, patch:str, name: str):
         self.__connection = sqlite3.connect(patch + "/" + name + ".db")
         self.__cursor = self.__connection.cursor()
@@ -15,27 +14,70 @@ class Database:
             road varchar not null)"""
         self.__cursor.execute(query)
 
-    def newRoad(self, ingoing: bool, direction: str, num: int):
+    def newRoad(self, ingoing: bool, direction: str, num: int, isSidewalk: bool):
         if direction not in ('n', 'e', 'w', 's'):
             print("Wrong direction: ", direction, ", expected n, e, w or s")
             return
-        name = "{0}-road-{1}-{2}".format("in" if ingoing else "out", direction, num)
+        name = "{0}-{1}-{2}-{3}".format("in" if ingoing else "out", "sidewalk" if isSidewalk else "road", direction, num)
+        self.newRoadByName(name)
+        return name
+
+    def newRoadByName(self, name:str):
         query = "INSERT INTO roads values ('{0}', '{1}')".format(name, "red")
         self.__cursor.execute(query)
         self.__connection.commit()
-        return name
 
     def newCar(self, time: float, roadName:str):
         query = """SELECT COUNT(*) FROM roads WHERE name='{0}'""".format(roadName)
         res = self.__cursor.execute(query)
-        if(res.fetchone()[0] != 1):
+        if(res.fetchone()[0] < 1):
             print("Road with name {0} does not exists!".format(roadName))
             return
         query = """INSERT INTO cars VALUES('{0}', '{1}')""".format(time, roadName)
         self.__cursor.execute(query)
         self.__connection.commit()
+    
+    def calculate(self, roadName: str):
+        query = "SELECT time FROM cars WHERE road='{0}'".format(roadName)
+        times = [x[0] for x in self.__cursor.execute(query).fetchall()]
+        now = time.time()
+        res = 0
+        for x in times:
+            res += int(now - x)**2
+        return res
 
-db = Database("Database", "test")
-road = db.newRoad(True, 'n', 0)
-db.newCar(time.time(), road)
-db.newCar(time.time(), "road")
+    def greenLight(self, roadName: str):
+        query = "DELETE FROM TABLE cars WHERE road='{0}'".format(roadName)
+        self.__cursor.execute(query)
+        self.__connection.commit()
+        # TODO pass certain number of cars
+        query = """UPDATE TABLE roads 
+            SET state = 'green'
+            WHERE name={0}""".format(roadName)
+        self.__cursor.execute(query)
+        self.__connection.commit()
+
+    def redLight(self, roadName: str):
+        query = """UPDATE TABLE roads 
+            SET state = 'red'
+            WHERE name={0}""".format(roadName)
+        self.__cursor.execute(query)
+        self.__connection.commit()
+
+    def getRoadNames(self):
+        query = "SELECT name FROM roads"
+        roads = self.__cursor.execute(query)
+        return [x[0] for x in roads.fetchall()]
+
+# db = Crossroad("Database", "test")
+# roadNames = db.getRoadNames()
+# if len(roadNames)>0:
+#     road = roadNames[0]
+# else:
+#     road = db.newRoad(True, 'n', 0, False)
+# db.newCar(time.time(), road)
+# time.sleep(1)
+# db.newCar(time.time(), road)
+# time.sleep(2)
+# db.newCar(time.time(), road)
+# print(db.calculate(road))
