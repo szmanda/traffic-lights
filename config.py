@@ -1,7 +1,8 @@
 import os
 from Database.database import Crossroad
 
-os.remove("Database/roadWithSidewalk.db")
+if os.path.exists("Database/roadWithSidewalk.db"):
+    os.remove("Database/roadWithSidewalk.db")
 crossroad = Crossroad("roadWithSidewalk")
 crossroad.newRoad(True, 'n', 0, False)
 crossroad.newRoad(False, 'n', 0, False)
