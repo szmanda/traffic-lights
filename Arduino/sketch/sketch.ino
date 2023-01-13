@@ -4,7 +4,7 @@
 #include <ArduinoJson.h>
 #include <string>
 
-bool DEBUG = true;
+bool DEBUG = false;
 String lanes[] = {
   "in-road-north-1",
   "in-road-south-1",
@@ -14,6 +14,19 @@ String lanes[] = {
   "in-sidewalk-east-1"
 };
 
+int CAR1 = 0, // id from lanes[]
+    CAR1_RED = 12,
+    CAR1_YELLOW = 11,
+    CAR1_GREEN = 10,
+    CAR1_IN = 9,
+    CAR1_OUT = 8;
+
+int SIDEWALK1 = 4,
+    SIDEWALK1_RED = 7,
+    SIDEWALK1_GREEN = 6,
+    SIDEWALK1_ANALOG_IN = A0;
+
+bool inputBuffer[13] = { 0 }; // stores last value of digitalRead()
 
 // method sends a message via serial port (commandName = "add"|"remove"|"set")
 void serialCommand(String commandName, String laneName, int count, int timeOffset);
@@ -25,20 +38,74 @@ void serialState();
 void setup() {
   Serial.begin(9600);
   Serial.setTimeout(1000); // set timeout to 1 second
+  pinMode(CAR1_RED, OUTPUT);
+  pinMode(CAR1_YELLOW, OUTPUT);
+  pinMode(CAR1_GREEN, OUTPUT);
+  pinMode(CAR1_IN, INPUT_PULLUP);
+  pinMode(CAR1_OUT, INPUT_PULLUP);
+  pinMode(SIDEWALK1_RED, OUTPUT);
+  pinMode(SIDEWALK1_GREEN, OUTPUT);
+  pinMode(SIDEWALK1_ANALOG_IN, INPUT);
 }
- 
+
+int prev_pedestrian_count = 0;
+int loop_counter = 0;
 void loop() {
-  // SEND
-  serialCommand("add", "in-road-north-1", 2, 0);
-  serialCommand("remove", "in-road-north-1", 1, 0);
-  serialCommand("set", "in-road-north-1", 5, 0);
+  // SEND (testing)
+//  serialCommand("add", "in-road-north-1", 2, 0);
+//  serialCommand("remove", "in-road-north-1", 1, 0);
+//  serialCommand("set", "in-road-north-1", 5, 0);
+
+  // READ SENSORS
+  if (isPressed(CAR1_IN)) // Adding a new car with -10sec offset
+    serialCommand("add", "in-road-north-1", 1, -10);
+  if (isPressed(CAR1_OUT)) // Removing a car from the waitlist
+    serialCommand("remove", "in-road-north-1", 1, 0);
+  if (loop_counter % 20 == 0) {
+    int weight = analogRead(SIDEWALK1_ANALOG_IN); // 0..1023 (lets say kg)
+    int avg_weight = 80; // average weight of a person
+    int pedestrian_count = weight / avg_weight;
+    if (pedestrian_count != prev_pedestrian_count) {
+      serialCommand("set", "in-sidewalk-west-1", pedestrian_count, 0);
+      prev_pedestrian_count = pedestrian_count;
+    }
+  }
 
   // RECEIVE
   serialState();
   
   // WAIT
-  delay(5000);
+  delay(100);
+  loop_counter++;
 }
+
+// ==== Handling digital input ==== //
+// Activates only once per button press
+bool isPressed(int PIN) {
+  if (digitalRead(PIN) == LOW) {
+    if (!inputBuffer[PIN]){
+      inputBuffer[PIN] = true;
+      return true;
+    }
+    return false;
+  }
+  inputBuffer[PIN] = false;
+  return false;
+}
+
+// ==== Handling lights ==== //
+// example: setLights('g', 10, 11, 12) - set a green light using given pins
+void setLights(char light, int RED, int YELLOW, int GREEN) {
+  digitalWrite(RED, LOW);
+  digitalWrite(YELLOW, LOW);
+  digitalWrite(GREEN, LOW);
+  switch (light) {
+    case 'r': digitalWrite(RED, HIGH); break;
+    case 'y': digitalWrite(YELLOW, HIGH); break;
+    case 'g': digitalWrite(GREEN, HIGH); break;
+  }
+}
+
 
 // ==== Handling serial port messages ==== //
 
@@ -82,6 +149,12 @@ void serialState(){
   // (we must use as<T>() to resolve the ambiguity)
   if (DEBUG) Serial.println("Succesfully received JSON");
   for (String lane : lanes) {
+    char light = doc[lane]["light"].as<String>()[0];
+    if (lane == lanes[CAR1])
+      setLights(light, CAR1_RED, CAR1_YELLOW, CAR1_GREEN);
+    if (lane == lanes[SIDEWALK1])
+      setLights(light, SIDEWALK1_RED, SIDEWALK1_RED, SIDEWALK1_GREEN);
+    
     if (DEBUG) {
       Serial.println(lane);
       Serial.print("\t light:");
