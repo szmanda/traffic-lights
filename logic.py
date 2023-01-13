@@ -1,11 +1,12 @@
 import time
 from Database.database import Crossroad
 
-TIME = 5 #seconds
+TIME = 1 #seconds
 
 # dict of combinations of roads that can be turned green at the same time
 possibleCombinations = {
-
+    1: ["in-road-n-0", "in-road-s-0", "out-road-n-0", "out-road-s-0"],
+    2: ["in-sidewalk-e-0"]
 }
 
 
@@ -26,18 +27,19 @@ def changeLights():
             bestCombination = withCurrRoad
         if len(bestCombination) <= 1:
             break
-
+    
+    print(bestCombination[0])
     # use chosen combination
     for name in  possibleCombinations[bestCombination[0]]:
         crossroad.greenLight(name)
 
 def main():
     global crossroad
-    crossroad = Crossroad("first")
+    crossroad = Crossroad("roadWithSidewalk")
     if len(crossroad.getRoadNames()) <= 0:
         print("initialise database!")
         exit()
-    while True:
+    for _ in range(5):
         changeLights()
         time.sleep(TIME)
 

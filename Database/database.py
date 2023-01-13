@@ -52,15 +52,15 @@ class Crossroad:
         return res
     
     def greenLight(self, roadName: str):
+        query = """UPDATE roads 
+            SET state = 'green'
+            WHERE name='{0}'""".format(roadName)
+        self.__cursor.execute(query)
+        self.__connection.commit()
         query = "DELETE FROM cars WHERE road='{0}'".format(roadName)
         self.__cursor.execute(query)
         self.__connection.commit()
         # TODO pass certain number of cars
-        query = """UPDATE roads 
-            SET state = 'green'
-            WHERE name={0}""".format(roadName)
-        self.__cursor.execute(query)
-        self.__connection.commit()
 
     def redLight(self, roadName: str):
         query = """UPDATE roads 
