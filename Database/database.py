@@ -32,13 +32,14 @@ class Crossroad:
         self.__cursor.execute(query)
         self.__connection.commit()
 
-    def newCar(self, time: float, roadName:str):
-        query = """SELECT COUNT(*) FROM roads WHERE name='{0}'""".format(roadName)
+    def newCar(self, roadName:str, timeOffset: float = 0):
+        t = time.time() - timeOffset
+        query = f"""SELECT COUNT(*) FROM roads WHERE name='{roadName}'"""
         res = self.__cursor.execute(query)
         if(res.fetchone()[0] < 1):
-            print("Road with name {0} does not exists!".format(roadName))
+            print(f"Road with name {roadName} does not exists!")
             return
-        query = """INSERT INTO cars VALUES('{0}', '{1}')""".format(time, roadName)
+        query = f"""INSERT INTO cars VALUES('{t}', '{roadName}')"""
         self.__cursor.execute(query)
         self.__connection.commit()
     
@@ -48,7 +49,7 @@ class Crossroad:
         now = time.time()
         res = 0
         for x in times:
-            res += int(now - x)**2
+            res += (int(now - x) if x<now else 0)**2
         return res
     
     def greenLight(self, roadName: str):
@@ -57,10 +58,12 @@ class Crossroad:
             WHERE name='{0}'""".format(roadName)
         self.__cursor.execute(query)
         self.__connection.commit()
-        query = "DELETE FROM cars WHERE road='{0}'".format(roadName)
-        self.__cursor.execute(query)
-        self.__connection.commit()
-        # TODO pass certain number of cars
+        self.passCar({
+            f"{roadName}": {
+                "count" : 1,
+                "time-offset": 0
+            }
+        })
 
     def redLight(self, roadName: str):
         query = """UPDATE roads 
@@ -76,12 +79,12 @@ class Crossroad:
         self.__connection.commit()
 
     def getRoadsByImpatience(self):
-        query = "SELECT name FROM roads"
+        query = "SELECT name FROM roads WHERE name LIKE 'in%';"
         roads = [x[0] for x in self.__cursor.execute(query).fetchall()]
-        keys = []
+        impatience = []
         for x in roads:
-            keys.append(self.calculateImpatience(x))
-        return [x for _, x in sorted(zip(keys, roads))]
+            impatience.append(self.calculateImpatience(x))
+        return [x for _, x in sorted(zip(impatience, roads), reverse=True)]
 
     def getRoadNames(self):
         query = "SELECT name FROM roads"
@@ -91,16 +94,26 @@ class Crossroad:
     def getLight(self, roadName: str):
         query = f"SELECT state FROM roads WHERE name = '{roadName}'"
         return self.__cursor.execute(query).fetchone()[0]
+    
+    def passCar(self, json:dict):
+        # json = {
+        #     "in-road-north-1": {
+        #         "count" : 1,
+        #         "time-offset": 0
+        #     }
+        # }
+        name = list(json.keys())[0]
+        count = json[name]["count"]
+        query = f"SELECT count(*) FROM cars WHERE road='{name}'"
+        numberOfCars = self.__cursor.execute(query).fetchone()[0]
+        if numberOfCars <= 0:
+            return
+        query = f"""DELETE FROM cars 
+            WHERE rowid = 
+            (SELECT rowid FROM cars 
+            WHERE road = '{name}'
+            ORDER BY time ASC
+            LIMIT {count});"""
+        self.__cursor.execute(query)
+        self.__connection.commit()
 
-# db = Crossroad("test", "Database")
-# roadNames = db.getRoadNames()
-# if len(roadNames)>0:
-#     road = roadNames[0]
-# else:
-#     road = db.newRoad(True, 'n', 0, False)
-# db.newCar(time.time(), road)
-# time.sleep(1)
-# db.newCar(time.time(), road)
-# time.sleep(2)
-# db.newCar(time.time(), road)
-# print(db.calculate(road))
