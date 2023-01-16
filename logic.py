@@ -5,8 +5,8 @@ TIME = 1 #seconds
 
 # dict of combinations of roads that can be turned green at the same time
 possibleCombinations = {
-    1: ["in-road-n-0", "in-road-s-0", "out-road-n-0", "out-road-s-0"],
-    2: ["in-sidewalk-e-0"]
+    1: ["in_road_n_0", "in_road_s_0", "out_road_n_0", "out_road_s_0"],
+    2: ["in_sidewalk_e_0"]
 }
 
 

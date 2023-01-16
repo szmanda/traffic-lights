@@ -19,11 +19,11 @@ class Crossroad:
         self.__cursor.execute(query)
         self.__connection.commit()
 
-    def newRoad(self, ingoing: bool, direction: str, num: int, isSidewalk: bool):
+    def newRoad(self, ingoing: bool, isSidewalk: bool, direction: str, num: int):
         if direction not in ('n', 'e', 'w', 's'):
             print("Wrong direction: ", direction, ", expected n, e, w or s")
             return
-        name = "{0}-{1}-{2}-{3}".format("in" if ingoing else "out", "sidewalk" if isSidewalk else "road", direction, num)
+        name = "{0}_{1}_{2}_{3}".format("in" if ingoing else "out", "sidewalk" if isSidewalk else "road", direction, num)
         self.newRoadByName(name)
         return name
 
@@ -32,7 +32,7 @@ class Crossroad:
         self.__cursor.execute(query)
         self.__connection.commit()
 
-    def newCar(self, roadName:str, timeOffset: float = 0):
+    def newCar(self, roadName:str, timeOffset: float = 0, times:int = 1):
         t = time.time() - timeOffset
         query = f"""SELECT COUNT(*) FROM roads WHERE name='{roadName}'"""
         res = self.__cursor.execute(query)
@@ -40,8 +40,9 @@ class Crossroad:
             print(f"Road with name {roadName} does not exists!")
             return
         query = f"""INSERT INTO cars VALUES('{t}', '{roadName}')"""
-        self.__cursor.execute(query)
-        self.__connection.commit()
+        for _ in range(times):
+            self.__cursor.execute(query)
+            self.__connection.commit()
     
     def calculateImpatience(self, roadName: str):
         query = "SELECT time FROM cars WHERE road='{0}'".format(roadName)
@@ -61,7 +62,7 @@ class Crossroad:
         self.passCar({
             f"{roadName}": {
                 "count" : 1,
-                "time-offset": 0
+                "time_offset": 0
             }
         })
 
@@ -94,22 +95,27 @@ class Crossroad:
     def getLight(self, roadName: str):
         query = f"SELECT state FROM roads WHERE name = '{roadName}'"
         return self.__cursor.execute(query).fetchone()[0]
+
+    def getNumberOfCarsOnRoad(self, roadName: str):
+        query = f"""SELECT COUNT(*) FROM cars WHERE road = '{roadName}' """
+        return self.__cursor.execute(query).fetchone()[0]
     
     def passCar(self, json:dict):
         # json = {
-        #     "in-road-north-1": {
+        #     "in_road_n_0": {
         #         "count" : 1,
-        #         "time-offset": 0
+        #         "time_offset": 0
         #     }
         # }
         name = list(json.keys())[0]
         count = json[name]["count"]
-        query = f"SELECT count(*) FROM cars WHERE road='{name}'"
-        numberOfCars = self.__cursor.execute(query).fetchone()[0]
-        if numberOfCars <= 0:
+        numberOfCars = self.getNumberOfCarsOnRoad(name)
+        if count < 0:
+            count += numberOfCars
+        if numberOfCars <= 0 or count <= 0:
             return
         query = f"""DELETE FROM cars 
-            WHERE rowid = 
+            WHERE rowid in 
             (SELECT rowid FROM cars 
             WHERE road = '{name}'
             ORDER BY time ASC
