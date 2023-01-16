@@ -33,7 +33,7 @@ div.widget {
     right: -1em;
     margin: auto;
     background-color: rgba(255, 255, 255, 0.1);
-    width: 4em;
+    width: 3em;
     border-radius: 5px;
     font-size: 2em;
     padding: 0.2em;
@@ -58,4 +58,9 @@ div.widget>div.light.yellow {
 }
 div.widget>div.light.green {
     background-color: green;
+}
+div.widgets {
+    width: 25em;
+    position: absolute;
+    left: 30cm;
 }
