@@ -46,7 +46,7 @@ $( document ).ready(function() {
 
 
 
-  // setRoadState('in-road-south-1', 3, 'green');
+  // setRoadState('in_road_s_0', 3, 'green');
   
   // TODO: Move the following to a static class Remote
 
@@ -54,7 +54,7 @@ $( document ).ready(function() {
   /*
   Expecting json:
   {
-    "in-road-north-1": {
+    "in_road_n_0": {
       "light" : "red|yellow|green"
       "waiting-count" : 0
     },
@@ -79,7 +79,7 @@ $( document ).ready(function() {
   - set to 'n'
   Sending json:
   {
-    "in-road-north-1": {
+    "in_road_n_0": {
       "count" : 2
       "time-offset": -10
     }

@@ -6,12 +6,12 @@
 
 bool DEBUG = false;
 String lanes[] = {
-  "in-road-north-1",
-  "in-road-south-1",
-  "out-road-north-1",
-  "out-road-south-1",
-  "in-sidewalk-west-1",
-  "in-sidewalk-east-1"
+  "in_road_n_0",
+  "in_road_s_0",
+  "out_road_n_0",
+  "out_road_s_0",
+  "in_sidewalk_w_0",
+  "in_sidewalk_e_0"
 };
 
 int CAR1 = 0, // id from lanes[]
@@ -32,7 +32,7 @@ bool inputBuffer[13] = { 0 }; // stores last value of digitalRead()
 void serialCommand(String commandName, String laneName, int count, int timeOffset);
 
 // if available, method reads JSON from serial port
-// example json: {"in-road-north-1":{"light":"red", "waiting-count":5}, "in-road-south-1":{"light":"yellow", "waiting-count":2}}
+// example json: {"in_road_n_0":{"light":"red", "waiting-count":5}, "in_road_s_0":{"light":"yellow", "waiting-count":2}}
 void serialState();
 
 void setup() {
@@ -52,21 +52,21 @@ int prev_pedestrian_count = 0;
 int loop_counter = 0;
 void loop() {
   // SEND (testing)
-//  serialCommand("add", "in-road-north-1", 2, 0);
-//  serialCommand("remove", "in-road-north-1", 1, 0);
-//  serialCommand("set", "in-road-north-1", 5, 0);
+//  serialCommand("add", "in_road_n_0", 2, 0);
+//  serialCommand("remove", "in_road_n_0", 1, 0);
+//  serialCommand("set", "in_road_n_0", 5, 0);
 
   // READ SENSORS
   if (isPressed(CAR1_IN)) // Adding a new car with -10sec offset
-    serialCommand("add", "in-road-north-1", 1, -10);
+    serialCommand("add", "in_road_n_0", 1, -10);
   if (isPressed(CAR1_OUT)) // Removing a car from the waitlist
-    serialCommand("remove", "in-road-north-1", 1, 0);
+    serialCommand("remove", "in_road_n_0", 1, 0);
   if (loop_counter % 20 == 0) {
     int weight = analogRead(SIDEWALK1_ANALOG_IN); // 0..1023 (lets say kg)
     int avg_weight = 80; // average weight of a person
     int pedestrian_count = weight / avg_weight;
     if (pedestrian_count != prev_pedestrian_count) {
-      serialCommand("set", "in-sidewalk-west-1", pedestrian_count, 0);
+      serialCommand("set", "in_sidewalk_w_0", pedestrian_count, 0);
       prev_pedestrian_count = pedestrian_count;
     }
   }
