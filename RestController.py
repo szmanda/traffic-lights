@@ -2,8 +2,8 @@
 ## pip install -r requirements.txt
 
 # to run server
-## in terminal type: uvicorn RestController:app --reload
-## server will run on port 8000
+## in terminal type: uvicorn RestController:app --host=0.0.0.0 --reload
+## server will run on port 8000, host 0.0.0.0 makes the api available in local network
 
 from fastapi import FastAPI, Path, Query
 from typing import Optional

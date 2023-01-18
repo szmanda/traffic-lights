@@ -1,4 +1,5 @@
 import time
+import serial
 from Database.database import Crossroad
 
 TIME = 1 #seconds
@@ -33,14 +34,28 @@ def changeLights():
     for name in  possibleCombinations[bestCombination[0]]:
         crossroad.greenLight(name)
 
+def setupSerial():
+    ser = serial.Serial('/dev/ttyACM0', 9600, timeout=1)
+    ser.reset_input_buffer()
+    return ser
+
+def readSerial(ser):
+    if ser.in_waiting > 0:
+        command = ser.readline().decode('utf-8').rstrip()
+        json = ser.readline().decode('utf-8').rstrip()
+        print("reading: ", command, json)
+        return [command, json]
+
 def main():
     global crossroad
     crossroad = Crossroad("roadWithSidewalk")
     if len(crossroad.getRoadNames()) <= 0:
         print("initialise database!")
         exit()
-    for _ in range(5):
+    ser = setupSerial()
+    for _ in range(20):
         changeLights()
+        readSerial(ser)
         time.sleep(TIME)
 
 if __name__ == "__main__":
