@@ -13,14 +13,14 @@ from Database.database import Crossroad
 
 
 class RoadStateSetter(BaseModel):
-    count:int
-    time_offset:int
+    count:Optional[int]
+    time_offset:Optional[int]
 
 class StateAmendRequest(BaseModel):
-    in_road_n_0:RoadStateSetter
-    in_road_s_0:RoadStateSetter
-    in_sidewalk_e_0:RoadStateSetter
-    in_sidewalk_w_0:RoadStateSetter
+    in_road_n_0:Optional[RoadStateSetter]
+    in_road_s_0:Optional[RoadStateSetter]
+    in_sidewalk_e_0:Optional[RoadStateSetter]
+    in_sidewalk_w_0:Optional[RoadStateSetter]
 
 databaseName = "roadWithSidewalk"
 in_road_n_0 = "in_road_n_0"
@@ -63,13 +63,16 @@ def removeExpectant(newState:StateAmendRequest):
     
 @app.post("/api/v1/add")
 def addExpectant(newState:StateAmendRequest):
+    print(newState)
     crossroad = Crossroad(databaseName)
-
     requestDict = newState.dict()
     roadDicts = ([{x[0]:x[1]} for x in list(requestDict.items())])
     for road in roadDicts:
+        print("road: ", road)
         for roadName, attrib in road.items():
-             crossroad.newCar(roadName, attrib["time_offset"], attrib["count"])
+            if attrib != None:
+                # print(roadName, attrib)
+                crossroad.newCar(roadName, attrib["time_offset"], attrib["count"])
         
 
 @app.put("/api/v1/set")

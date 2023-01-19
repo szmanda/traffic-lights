@@ -64,7 +64,7 @@ $( document ).ready(function() {
   setInterval(function() {
     serverUrl = 'http://' + $('#server-url').val() + ':' + $('#server-port').val();
     console.log(serverUrl);
-    $.ajax({url: serverUrl+'/state', success: function(result){
+    $.ajax({url: serverUrl+'/api/v1/state', success: function(result){
       console.warn("(not implemented) setting state based on server info");
     }})
       .fail(function(e) { console.log("Error connecting to ", serverUrl) });
@@ -81,7 +81,7 @@ $( document ).ready(function() {
   {
     "in_road_n_0": {
       "count" : 2
-      "time-offset": -10
+      "time_offset": -10
     }
   }
   */
@@ -89,10 +89,10 @@ $( document ).ready(function() {
     var data = {};
     data[_road] = {
       "count" : _count,
-      "time-offset" : _timeOffset
+      "time_offset" : _timeOffset
     }
     $.ajax({
-      url: serverUrl+'/'+_command,
+      url: serverUrl+'/api/v1/'+_command,
       type: 'POST',
       data: JSON.stringify(data),
       contentType: 'application/json; charset=utf-8',
