@@ -67,8 +67,7 @@ def removeExpectant(newState:StateAmendRequest):
     for road in roadDicts:
         # print("road", road)
         if list(road.values())[0] != None:
-            # print("None")
-            crossroad.passCar(road)
+            crossroad.passCar(str(road))
     
 @app.post("/api/v1/add")
 def addExpectant(newState:StateAmendRequest):
