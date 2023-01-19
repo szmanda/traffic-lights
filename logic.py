@@ -1,6 +1,7 @@
 import time
 import serial
 from Database.database import Crossroad
+from RestController import getState
 
 TIME = 1 #seconds
 
@@ -59,14 +60,18 @@ def main():
     ser = setupSerial()
     for _ in range(20):
         changeLights()
-        # TODO update database based on this:
         result = readSerial(ser)
         if (result != None):
             command, json = result
+            if command == "add":
+                crossroad.newCarByJson(json)
+            elif command == "remove":
+                crossroad.passCarByJson(json)
+            elif command == "set":
+                crossroad.setNumberOfCars(json)
             print(result)
         print(type(result))
-        # TODO replace placeholder json string with current state of traffic lights
-        writeSerial(ser, '{"in_road_n_0":{"light":"red","waiting_count":0},"in_road_s_0":{"light":"red","waiting_count":0},"in_sidewalk_e_0":{"light":"green","waiting_count":0},"in_sidewalk_w_0":{"light":"green","waiting_count":0}}')
+        writeSerial(ser, str(getState()))
         time.sleep(TIME)
 
 if __name__ == "__main__":

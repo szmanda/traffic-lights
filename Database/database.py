@@ -1,5 +1,6 @@
 import sqlite3
 import time
+import json as js
 
 class Crossroad:
     def __init__(self, name: str, path:str = "Database"):
@@ -43,6 +44,24 @@ class Crossroad:
         for _ in range(times):
             self.__cursor.execute(query)
             self.__connection.commit()
+
+    def newCarByJson(self, jsonStr:str):
+        json = js.loads(jsonStr)
+        name = list(json.keys())[0]
+        count = json[name]["count"]
+        time_offset = json[name]["time_offset"]
+        self.newCar(name, time_offset, count)
+
+    def setNumberOfCars(self, jsonStr:str):
+        json = js.loads(jsonStr)
+        name = list(json.keys())[0]
+        count = json[name]["count"]
+        time_offset = json[name]["time_offset"]
+        carsNum = self.getNumberOfCarsOnRoad(name)
+        if count > carsNum:
+            self.newCar(name, time_offset, count-carsNum)
+        elif count < carsNum:
+            self.passCar(name, count)
     
     def calculateImpatience(self, roadName: str):
         query = "SELECT time FROM cars WHERE road='{0}'".format(roadName)
@@ -59,12 +78,6 @@ class Crossroad:
             WHERE name='{0}'""".format(roadName)
         self.__cursor.execute(query)
         self.__connection.commit()
-        self.passCar({
-            f"{roadName}": {
-                "count" : 1,
-                "time_offset": 0
-            }
-        })
 
     def redLight(self, roadName: str):
         query = """UPDATE roads 
@@ -100,15 +113,19 @@ class Crossroad:
         query = f"""SELECT COUNT(*) FROM cars WHERE road = '{roadName}' """
         return self.__cursor.execute(query).fetchone()[0]
     
-    def passCar(self, json:dict):
+    def passCarByJson(self, jsonStr:str):
         # json = {
         #     "in_road_n_0": {
         #         "count" : 1,
         #         "time_offset": 0
         #     }
         # }
+        json = js.loads(jsonStr)
         name = list(json.keys())[0]
         count = json[name]["count"]
+        self.passCar(name, count)
+    
+    def passCar(self, name:str, count:int):
         numberOfCars = self.getNumberOfCarsOnRoad(name)
         if count < 0:
             count += numberOfCars
