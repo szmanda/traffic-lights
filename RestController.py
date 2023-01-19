@@ -6,6 +6,7 @@
 ## server will run on port 8000, host 0.0.0.0 makes the api available in local network
 
 from fastapi import FastAPI, Path, Query
+from fastapi.middleware.cors import CORSMiddleware
 from typing import Optional
 from pydantic import BaseModel
 
@@ -29,6 +30,12 @@ in_sidewalk_e_0 = "in_sidewalk_e_0"
 in_sidewalk_w_0 = "in_sidewalk_w_0"
 
 app = FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @app.get("/api/v1/state")
 def getState():

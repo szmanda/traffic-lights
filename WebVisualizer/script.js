@@ -65,7 +65,14 @@ $( document ).ready(function() {
     serverUrl = 'http://' + $('#server-url').val() + ':' + $('#server-port').val();
     console.log(serverUrl);
     $.ajax({url: serverUrl+'/api/v1/state', success: function(result){
-      console.warn("(not implemented) setting state based on server info");
+      console.log("Setting state based on server info");
+      const roads = $('.road, .sidewalk')
+      for (let i = 0; i < roads.length; i++) {
+        info = result[roads[i].id]
+        if (info !== undefined) {
+          setRoadState(roads[i].id, info['waiting_count'], info['light']);
+        }
+      }
     }})
       .fail(function(e) { console.log("Error connecting to ", serverUrl) });
   }, 5000);
@@ -97,7 +104,7 @@ $( document ).ready(function() {
       data: JSON.stringify(data),
       contentType: 'application/json; charset=utf-8',
       success: function(result){
-        console.warn("(not implemented) sending a json");
+        console.log("Succesfully sent a json");
       }
     }).fail(() => {
       console.log("Error while sending:", JSON.stringify(data));
